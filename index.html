@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Vice by justim</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Vice</h1>
+        <h2>Vice is a small web framework for easy dispatching actions for a given URL</h2>
+        <a href="https://github.com/justim/vice" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a name="vice" class="anchor" href="#vice"><span class="octicon octicon-link"></span></a>Vice</h1>
+
+<p>Vice is a small web framework for easy dispatching actions for a given URL.</p>
+
+<p>It uses some nifty tricks to make sure you don't have to;</p>
+
+<ul>
+<li>Easy restriction of HTTP-methods</li>
+<li>Simple AJAX response</li>
+<li>Arguments filled based on their name, for easy access</li>
+<li>Named parameters in the URI</li>
+<li>Powerfull filters</li>
+</ul><h2>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h2>
+
+<ul>
+<li>PHP &gt;= 5.4</li>
+</ul><h2>
+<a name="example-application" class="anchor" href="#example-application"><span class="octicon octicon-link"></span></a>Example application</h2>
+
+<p>You can check the <code>example</code>-directory in this repository to see it all in action.</p>
+
+<h2>
+<a name="examples" class="anchor" href="#examples"><span class="octicon octicon-link"></span></a>Examples</h2>
+
+<h3>
+<a name="basic-example" class="anchor" href="#basic-example"><span class="octicon octicon-link"></span></a>Basic example</h3>
+
+<div class="highlight"><pre><span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Vice</span><span class="p">;</span>
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">route</span><span class="p">(</span><span class="s1">'/'</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nv">$render</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// $render is a builtin helper to get a simple template on your screen</span>
+    <span class="k">echo</span> <span class="nv">$render</span><span class="p">(</span><span class="s1">'index.php'</span><span class="p">,</span> <span class="p">[</span> <span class="cm">/* view */</span> <span class="p">]);</span>
+<span class="p">});</span>
+<span class="nv">$app_</span><span class="o">&gt;</span><span class="nx">run</span><span class="p">();</span>
+</pre></div>
+
+<h3>
+<a name="json-helper" class="anchor" href="#json-helper"><span class="octicon octicon-link"></span></a>JSON Helper</h3>
+
+<div class="highlight"><pre><span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Vice</span><span class="p">;</span>
+
+<span class="c1">// route that only responds to ajax-post requests</span>
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">post</span><span class="p">(</span><span class="s1">'/users'</span><span class="p">,</span> <span class="s1">'is:ajax'</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nv">$json</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// builtin helper, sets a header, encodes it, and dies</span>
+    <span class="nv">$json</span><span class="p">([</span>
+        <span class="p">[</span>
+            <span class="s1">'name'</span> <span class="o">=&gt;</span> <span class="s1">'Pizza kat'</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">]);</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="global-store" class="anchor" href="#global-store"><span class="octicon octicon-link"></span></a>Global store</h3>
+
+<div class="highlight"><pre><span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Vice</span><span class="p">(</span><span class="s1">'/'</span><span class="p">,</span> <span class="p">[</span>
+    <span class="s1">'db'</span> <span class="o">=&gt;</span> <span class="k">new</span> <span class="nx">Database</span><span class="p">,</span> <span class="c1">// some database connection</span>
+<span class="p">]);</span>
+
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'/'</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nv">$db</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// $db is the one that you put in the store</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="advanced-filters" class="anchor" href="#advanced-filters"><span class="octicon octicon-link"></span></a>Advanced filters</h3>
+
+<div class="highlight"><pre><span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Vice</span><span class="p">;</span>
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">registerFilter</span><span class="p">(</span><span class="s1">'is:logged'</span><span class="p">,</span> <span class="k">function</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="cm">/* some login check */</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="s1">'name'</span> <span class="o">=&gt;</span> <span class="s1">'Flavored mushrooms'</span><span class="p">,</span>
+        <span class="p">];</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">});</span>
+
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'/admin'</span><span class="p">,</span> <span class="s1">'is:logged'</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nv">$isLogged</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// $isLogged would contain the result of the filter,</span>
+    <span class="c1">// if the filter fails, then this function is never called</span>
+    <span class="k">echo</span> <span class="s1">'Hello '</span> <span class="o">.</span> <span class="nv">$isLogged</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span> <span class="o">.</span> <span class="s1">'!'</span><span class="p">;</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="subapps" class="anchor" href="#subapps"><span class="octicon octicon-link"></span></a>Subapps</h3>
+
+<div class="highlight"><pre><span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Vice</span><span class="p">(</span><span class="s1">'/'</span><span class="p">,</span> <span class="p">[</span> <span class="s1">'db'</span> <span class="o">=&gt;</span> <span class="k">new</span> <span class="nx">Database</span> <span class="p">]);</span>
+<span class="nv">$users</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Vice</span><span class="p">;</span>
+
+<span class="nv">$users</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'&lt;id&gt;'</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nv">$json</span><span class="p">,</span> <span class="nv">$db</span><span class="p">,</span> <span class="nv">$id</span><span class="p">,</span> <span class="nv">$param</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// $param('id') === $id</span>
+    <span class="nv">$json</span><span class="p">(</span><span class="nv">$db</span><span class="o">-&gt;</span><span class="na">users</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="nv">$id</span><span class="p">));</span>
+<span class="p">});</span>
+
+<span class="c1">// users subapp is available at /users and only for ajax-get-requests</span>
+<span class="c1">// this would make the route /users/1 available</span>
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'users'</span><span class="p">,</span> <span class="s1">'is:ajax'</span><span class="p">,</span> <span class="nv">$users</span><span class="p">);</span>
+</pre></div>
+
+<p><em>Subapps share the filters and store from their parent, but not the other way around.</em></p>
+
+<h3>
+<a name="multiple-filters-chained" class="anchor" href="#multiple-filters-chained"><span class="octicon octicon-link"></span></a>Multiple filters chained</h3>
+
+<div class="highlight"><pre><span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Vice</span><span class="p">(</span><span class="s1">'/'</span><span class="p">,</span> <span class="p">[</span> <span class="s1">'currentUser'</span> <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'db'</span> <span class="o">=&gt;</span> <span class="k">new</span> <span class="nx">Database</span> <span class="p">]);</span>
+
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">registerFilter</span><span class="p">(</span><span class="s1">'is:logged'</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nv">$db</span><span class="p">,</span> <span class="nv">$currentUser</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// check for existince of current user and return it</span>
+    <span class="k">return</span> <span class="nv">$db</span><span class="o">-&gt;</span><span class="na">users</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="nv">$currentUser</span><span class="p">)</span> <span class="o">?:</span> <span class="k">false</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">registerFilter</span><span class="p">(</span><span class="s1">'is:admin'</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nv">$isLogged</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="nv">$isLogged</span><span class="p">[</span><span class="s1">'admin'</span><span class="p">]</span> <span class="o">===</span> <span class="k">true</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">route</span><span class="p">(</span><span class="s1">'admin'</span><span class="p">,</span> <span class="s1">'is:logged is:admin'</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nv">$isLogged</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">echo</span> <span class="s1">'Hello '</span> <span class="o">.</span> <span class="nv">$isLogged</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span> <span class="o">.</span> <span class="s1">', you are an admin!'</span><span class="p">;</span>
+<span class="p">});</span>
+</pre></div>
+
+<h2>
+<a name="builtin-filters" class="anchor" href="#builtin-filters"><span class="octicon octicon-link"></span></a>Builtin filters</h2>
+
+<ul>
+<li>GET-request</li>
+<li>POST-request</li>
+<li>PUT-request</li>
+<li>DELETE-request</li>
+<li>AJAX-request</li>
+</ul><p><em>(by <code>$app-&gt;get(..)</code> or as a filter <code>$app-&gt;route('/', 'is:get')</code> (same for all others)</em></p>
+
+<h2>
+<a name="builtin-named-arguments" class="anchor" href="#builtin-named-arguments"><span class="octicon octicon-link"></span></a>Builtin named arguments</h2>
+
+<ul>
+<li>
+<code>$post</code> -&gt; <code>function($key, $default = null)</code>-wrapper for <code>$_POST</code>
+</li>
+<li>
+<code>$get</code> -&gt; <code>function($key, $default = null)</code>-wrapper for <code>$_GET</code>
+</li>
+<li>
+<code>$param</code> -&gt; <code>function($key, $default = null)</code>-wrapper for the parameters in the URI</li>
+<li>
+<code>$server</code> -&gt; <code>function($key, $default = null)</code>-wrapper for <code>$_SERVER</code>
+</li>
+<li>
+<code>$store</code> -&gt; <code>function($key, $default = null)</code>-wrapper for the global store</li>
+<li>
+<code>$filter</code> -&gt; <code>function($key, $default = null)</code>-wrapper for passed filter results</li>
+<li>
+<code>$ajax</code> -&gt; <code>boolean</code> that tells you if the request is an AJAX one</li>
+<li>
+<code>$json</code> -&gt; <code>function($data)</code> JSON helper</li>
+<li>
+<code>$render</code> -&gt; <code>function($template, $data = [])</code> little template renderer, searches for template in <code>./templates/</code>
+</li>
+<li>Keys from the <code>params</code>, <code>store</code>, <code>filterResults</code> (in that order)</li>
+</ul><h2>
+<a name="some-technical-insights" class="anchor" href="#some-technical-insights"><span class="octicon octicon-link"></span></a>Some technical insights</h2>
+
+<ul>
+<li>Every route is compiled to a regex, which is then matched against the current URI. When a match is found all the defined filters for that route are tested. If it is still a match, then we run the corresponding action. When the action is an app itself, the whole process is ran again, but without the prefix we already matched. After some looping something probably happened and we're done.</li>
+<li>
+<code>Reflection</code> is used to determine the value of the arguments</li>
+<li>It's a single class, everything else is a function</li>
+</ul>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/justim/vice/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/justim/vice/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/justim/vice"></a> is maintained by <a href="https://github.com/justim">justim</a>.</p>
+
+          <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
