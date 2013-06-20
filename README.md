@@ -13,7 +13,11 @@ It uses some nifty tricks to make sure you don't have to;
 * PHP >= 5.4
 
 ## Example application
-You can check the `example`-directory in this repository to see it all in action.
+You can check the `example`-directory in this repository to see it all in action. You can run the example with PHPs builtin server:
+
+	cd example && php -S localhost:9000
+
+Now open [http://localhost:9000](http://localhost:9000) in your browser to see the example.
 
 ## Examples
 

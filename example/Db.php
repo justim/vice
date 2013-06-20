@@ -5,6 +5,8 @@
  */
 function db(PDO $db)
 {
+	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
 	$tableHelper = function($table = null) use ($db, &$tableHelper)
 	{
 		if ($table !== null)
@@ -79,7 +81,7 @@ function db(PDO $db)
 				}
 			};
 		}
-		else
+		else if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql')
 		{
 			$tables = [];
 			$statement = $db->query("SHOW TABLES");
@@ -90,6 +92,22 @@ function db(PDO $db)
 			}
 
 			return $tables;
+		}
+		else if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite')
+		{
+			$tables = [];
+			$statement = $db->query("SELECT * FROM sqlite_master WHERE type='table'");
+
+			foreach ($statement->fetchAll(PDO::FETCH_ASSOC) as $table)
+			{
+				$tables[$table['name']] = $tableHelper($table['name']);
+			}
+
+			return $tables;
+		}
+		else
+		{
+			return [];
 		}
 	};
 
