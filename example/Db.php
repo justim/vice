@@ -17,7 +17,7 @@ function db(PDO $db)
 
 				$query = "UPDATE $table SET " .
 					implode(', ', array_map(function($q) { return $q . ' = ?'; }, array_keys($data))) .
-					" WHERE id = ? LIMIT 1";
+					" WHERE id = ?";
 
 				$updateStatement = $db->prepare($query);
 				return $updateStatement->execute(array_merge(array_values($data), [ $id ]));
@@ -43,7 +43,7 @@ function db(PDO $db)
 
 			$delete = function($id) use ($db, $table)
 			{
-				$statement = $db->prepare("DELETE FROM $table WHERE id = ? LIMIT 1");
+				$statement = $db->prepare("DELETE FROM $table WHERE id = ?");
 				return $statement->execute([ $id ]);
 			};
 
