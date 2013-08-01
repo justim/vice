@@ -15,7 +15,7 @@ It uses some nifty tricks to make sure you don't have to;
 ## Example application
 You can check the `example`-directory in this repository to see it all in action. You can run the example with PHPs builtin server:
 
-	cd example && php -S localhost:9000
+	php -S localhost:9000 -t example/
 
 Now open [http://localhost:9000](http://localhost:9000) in your browser to see the example.
 
