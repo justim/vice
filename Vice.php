@@ -122,6 +122,20 @@ class Vice
 	}
 
 	/**
+	 * Register multiple filters for your application
+	 * @param array list of filters
+	 */
+	public function registerFilters(array $filters)
+	{
+		foreach ($filters as $filterName => $filter)
+		{
+			$this->registerFilter($filterName, $filter);
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Shortcut for running the app
 	 */
 	public function __invoke()
@@ -236,7 +250,7 @@ class Vice
 		// filters can have colons in their name, variables don't
 		$filterResults = $this->_changeKeys($rawFilterResults, function($key)
 		{
-			return str_replace([ ':', ' ' ], '', $key);
+			return str_replace([ ':', ' ', '/' ], '', $key);
 		});
 
 		// remove the `_method` from the post, its for internal use
@@ -491,9 +505,21 @@ class Vice
 
 		foreach ($this->_availableFilters as $filterName => $filter)
 		{
-			if (preg_match('/\b' . preg_quote($filterName, '/') . '\b/i', $rawFilters))
+			if (preg_match('/(?<negative>!)?\b' . preg_quote($filterName, '/') . '\b/i', $rawFilters, $matches))
 			{
-				$filters[$filterName] = $filter;
+				if (!empty($matches['negative']))
+				{
+					$func = function() use ($filter)
+					{
+						return !$filter();
+					};
+				}
+				else
+				{
+					$func = $filter;
+				}
+
+				$filters[strtolower($filterName)] = $func;
 			}
 		}
 
