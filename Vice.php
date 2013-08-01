@@ -348,6 +348,22 @@ class Vice
 	}
 
 	/**
+	 * Create a helper to redirect an user to a different URI
+	 */
+	private function _createRedirectHelper()
+	{
+		return function($uri, $exit = true)
+		{
+			header('Location: ' . $uri);
+
+			if ($exit)
+			{
+				exit;
+			}
+		};
+	}
+
+	/**
 	 * Is the current request an AJAX-request
 	 */
 	private function _isAjax($server)
