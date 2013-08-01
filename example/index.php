@@ -14,7 +14,7 @@ $sqlite = new PDO('sqlite:' . __DIR__ . '/database.sq3');
 
 $db = db($sqlite);
 
-$app = new Vice('/', $db(/* list of tables */));
+$app = new Vice('/', $db(/* list of tables */) + ['render' => include 'helpers/render.php']);
 $app->registerFilter('is:logged', function($server)
 {
 	//TODO do some login foo

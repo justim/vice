@@ -24,9 +24,6 @@ class Vice
 	// base path
 	private $_basePath;
 
-	// template directory
-	private $_templateDirectory;
-
 	// store for arbitrary information
 	private $_store;
 
@@ -49,9 +46,6 @@ class Vice
 			'is:put'	=> [ $this, '_isPut' ],
 			'is:delete'	=> [ $this, '_isDelete' ],
 		];
-
-		// "callee directory"/templates
-		$this->_templateDirectory = dirname(debug_backtrace()[0]['file']) . '/templates/';
 	}
 
 	/**
@@ -261,16 +255,16 @@ class Vice
 
 			switch ($name)
 			{
-				case 'post':	$args[$i] = $this->_createParameterHelper([ $filteredPost ]);	break;
-				case 'get':		$args[$i] = $this->_createParameterHelper([ $_GET ]);			break;
-				case 'param':	$args[$i] = $this->_createParameterHelper([ $requestParams ]);	break;
-				case 'server':	$args[$i] = $this->_createParameterHelper([ $_SERVER ]);		break;
-				case 'store':	$args[$i] = $this->_createParameterHelper([ $store ]);			break;
-				case 'filter':	$args[$i] = $this->_createParameterHelper([ $filterResults ]);	break;
-				case 'ajax':	$args[$i] = $this->_isAjax();									break;
-				case 'json':	$args[$i] = $this->_createJsonHelper();							break;
-				case 'render':	$args[$i] = $this->_createRenderer();							break;
-				default:		$args[$i] = $parameterHelper($name);							break;
+				case 'post':     $args[$i] = $this->_createParameterHelper([ $filteredPost ]);  break;
+				case 'get':      $args[$i] = $this->_createParameterHelper([ $_GET ]);          break;
+				case 'param':    $args[$i] = $this->_createParameterHelper([ $requestParams ]); break;
+				case 'server':   $args[$i] = $this->_createParameterHelper([ $_SERVER ]);       break;
+				case 'store':    $args[$i] = $this->_createParameterHelper([ $store ]);         break;
+				case 'filter':   $args[$i] = $this->_createParameterHelper([ $filterResults ]); break;
+				case 'ajax':     $args[$i] = $this->_isAjax();                                  break;
+				case 'json':     $args[$i] = $this->_createJsonHelper();                        break;
+				case 'redirect': $args[$i] = $this->_createRedirectHelper();                    break;
+				default:         $args[$i] = $parameterHelper($name);                           break;
 			}
 
 			$i++;
@@ -349,39 +343,6 @@ class Vice
 			if ($exit)
 			{
 				exit;
-			}
-		};
-	}
-
-	/**
-	 * Create a helper for rendering a simple template
-	 */
-	private function _createRenderer()
-	{
-		return function($template, $viewObject = [], $echo = false)
-		{
-			$templatePath = $this->_templateDirectory . '/' . $template;
-
-			if (is_readable($templatePath))
-			{
-				ob_start();
-
-				extract($viewObject);
-				include $templatePath;
-
-				$contents = ob_get_contents();
-				ob_end_clean();
-
-				if ($echo)
-				{
-					echo $contents;
-				}
-
-				return $contents;
-			}
-			else
-			{
-				throw new Exception('Template does not exists [' . $template . ']');
 			}
 		};
 	}

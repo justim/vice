@@ -24,10 +24,9 @@ Now open [http://localhost:9000](http://localhost:9000) in your browser to see t
 ### Basic example
 ```php
 $app = new Vice;
-$app->route('/', function($render)
+$app->route('/', function()
 {
-    // $render is a builtin helper to get a simple template on your screen
-    echo $render('index.php', [ /* view */ ]);
+    echo 'Hello world!';
 });
 $app_>run();
 ```
@@ -141,7 +140,6 @@ _(by `$app->get(..)` or as a filter `$app->route('/', 'is:get')` (same for all o
 * `$filter` -> `function($key, $default = null)`-wrapper for passed filter results
 * `$ajax` -> `boolean` that tells you if the request is an AJAX one
 * `$json` -> `function($data)` JSON helper
-* `$render` -> `function($template, $data = [])` little template renderer, searches for template in `./templates/`
 * Keys from the `params`, `store`, `filterResults` (in that order)
 
 ## Some technical insights
