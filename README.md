@@ -28,7 +28,7 @@ $app->route('/', function()
 {
     echo 'Hello world!';
 });
-$app_>run();
+$app->run();
 ```
 
 ### JSON Helper
@@ -146,3 +146,6 @@ _(by `$app->get(..)` or as a filter `$app->route('/', 'is:get')` (same for all o
 * Every route is compiled to a regex, which is then matched against the current URI. When a match is found all the defined filters for that route are tested. If it is still a match, then we run the corresponding action. When the action is an app itself, the whole process is ran again, but without the prefix we already matched. After some looping something probably happened and we're done.
 * `Reflection` is used to determine the value of the arguments
 * It's a single class, everything else is a function
+
+## TODO
+* Some proper error handling
