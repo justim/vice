@@ -12,6 +12,11 @@ It uses some nifty tricks to make sure you don't have to;
 ## Requirements
 * PHP >= 5.4
 
+## Installation
+
+* For Vice to work you only need the `Vice.php` file, download it and hack away
+* Also available at [Packagist](https://packagist.org/packages/justim/vice) (Composer)
+
 ## Example application
 You can check the `example`-directory in this repository to see it all in action. You can run the example with PHPs builtin server:
 
