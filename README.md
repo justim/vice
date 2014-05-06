@@ -88,6 +88,7 @@ $app->get('/admin', 'is:logged', function($isLogged)
 	echo 'Hello ' . $isLogged['name'] . '!';
 });
 ```
+_Note: filters are run everytime they are called._
 
 ### Subapps
 ```php
@@ -123,6 +124,20 @@ $app->registerFilter('is:admin', function($isLogged)
 
 $app->route('admin', 'is:logged is:admin', function($isLogged)
 {
+    echo 'Hello ' . $isLogged['name'] . ', you are an admin!';
+});
+
+// a different way to handle this is by making a filter dependable
+// on another filter. this way you don't have to specify 'is:logged'
+// in your route definition
+$app->registerFilter('is:admin', 'is:logged', function($isLogged)
+{
+	return $isLogged['admin'] === true;
+});
+
+$app->route('admin', 'is:admin', function($isLogged)
+{
+	// $isLogged is still available, even though it was not specified for this particular route
     echo 'Hello ' . $isLogged['name'] . ', you are an admin!';
 });
 ```

@@ -19,7 +19,7 @@ class Vice
 	private $_routes;
 
 	// Available filters
-	private $_availableFilters;
+	private $_availableFilters = [];
 
 	// base path
 	private $_basePath;
@@ -39,43 +39,43 @@ class Vice
 		$this->_store = $store;
 
 		// setup default filters
-		$this->_availableFilters = [
-			'is:ajax'	=> [ $this, '_isAjax' ],
-			'is:get'	=> [ $this, '_isGet' ],
-			'is:post'	=> [ $this, '_isPost' ],
-			'is:put'	=> [ $this, '_isPut' ],
-			'is:delete'	=> [ $this, '_isDelete' ],
-		];
+		$this->registerFilters([
+			'is:ajax'    => [ $this, '_isAjax' ],
+			'is:get'     => [ $this, '_isGet' ],
+			'is:post'    => [ $this, '_isPost' ],
+			'is:put'     => [ $this, '_isPut' ],
+			'is:delete'  => [ $this, '_isDelete' ],
+		]);
 	}
 
 	/**
 	 * Helper function to create a route
 	 * Possible methods:
-	 * 	-	route		create a route that listens to all requests
-	 * 	-	get			create a route that only listens to GET-requests
-	 * 	-	post		create a route that only listens to POST-requests
-	 * 	-	put			create a route that only listens to PUT-requests
-	 * 	-	delete		create a route that only listens to DELETE-requests
+	 *   -  route   create a route that listens to all requests
+	 *   -  get     create a route that only listens to GET-requests
+	 *   -  post    create a route that only listens to POST-requests
+	 *   -  put     create a route that only listens to PUT-requests
+	 *   -  delete  create a route that only listens to DELETE-requests
 	 * @param string the route
 	 * @param [string] filters (ex.: is:ajax) (optional argument)
-	 * 			-	is:ajax		the request is an ajax request
-	 * 			-	is:get		the request is an GET-request
-	 * 			-	is:post		the request is an POST-request
-	 * 			-	is:put		the request is an PUT-request
-	 * 			-	is:delete	the request is an DELETE-request
-	 * 			-	any other user defined filter
+	 *          -  is:ajax    the request is an ajax request
+	 *          -  is:get     the request is an GET-request
+	 *          -  is:post    the request is an POST-request
+	 *          -  is:put     the request is an PUT-request
+	 *          -  is:delete  the request is an DELETE-request
+	 *          -  any other user defined filter
 	 * @param Callable|self the action or a subapp that is called when the route is matched
 	 */
 	public function __call($method, $arguments)
 	{
 		// list of methods with their predefined filters
 		$listOfMethods = [
-			'route'		=> '',
-			'get'		=> 'is:get',
-			'post'		=> 'is:post',
-			'put'		=> 'is:put',
-			'delete'	=> 'is:delete',
-			'ajax'		=> 'is:ajax',
+			'route'   => '',
+			'get'     => 'is:get',
+			'post'    => 'is:post',
+			'put'     => 'is:put',
+			'delete'  => 'is:delete',
+			'ajax'    => 'is:ajax',
 		];
 
 		if (isset($listOfMethods[$method]))
@@ -106,13 +106,34 @@ class Vice
 	/**
 	 * Register a filter for your application
 	 * @param string the name for your filter
+	 * @param [string] filters (ex.: is:ajax) (optional argument)
 	 * @param Callable the filter, you should return `true` when it passes
 	 */
-	public function registerFilter($name, Callable $filter)
+	public function registerFilter()
 	{
+		$arguments = func_get_args();
+
+		// we fiddle a bit with the arguments, so we need to extract/validate them ourselves
+		$name = array_shift($arguments);
+		if ($name === null)
+		{
+			throw new BadMethodCallException('Name is mandatory');
+		}
+
+		$filter = array_pop($arguments);
+		if (is_callable($filter) === false)
+		{
+			throw new BadMethodCallException('Filter needs to be specified');
+		}
+
 		if (array_key_exists($name, $this->_availableFilters) === false)
 		{
-			$this->_availableFilters[$name] = $filter;
+			$this->_availableFilters[$name] = [
+				'name' => $name,
+				'filter' => $filter,
+				'filters' => $this->_generateFilters((string) current($arguments)),
+			];
+
 			return $this;
 		}
 		else
@@ -183,26 +204,14 @@ class Vice
 
 		foreach ($this->_routes as $route => $meta)
 		{
-			if (preg_match($meta['route'], $uri, $matches))
+			if ($this->_matchUri($meta['route'], $uri, $requestParams))
 			{
-				// process all the params from the URI
-				foreach ($matches as $key => $match)
-				{
-					if (is_string($key)) // only named matches
-					{
-						$requestParams[$key] = $match;
-					}
-				}
-
 				// run all filters (ex.: http method validation)
-				foreach ($meta['filters'] as $filterName => $filter)
-				{
-					$filterResults[$filterName] = $this->_dispatch($filter, $requestParams, $store, $filterResults);
+				$filtersResult = $this->_runFilters($meta['filters'], $requestParams, $store, $filterResults);
 
-					if ($filterResults[$filterName] === false)
-					{
-						continue 2;
-					}
+				if ($filtersResult === false)
+				{
+					continue;
 				}
 
 				// detection of a subapp
@@ -234,6 +243,69 @@ class Vice
 		}
 
 		return false;
+	}
+
+	/**
+	 * Match uri against a route
+	 * @param string route
+	 * @param string uri
+	 * @param array matched request params from the uri
+	 */
+	private function _matchUri($route, $uri, &$requestParams)
+	{
+		$result = preg_match($route, $uri, $matches);
+
+		if ($result)
+		{
+			// process all the params from the URI
+			foreach ($matches as $key => $match)
+			{
+				if (is_string($key)) // only named matches
+				{
+					$requestParams[$key] = $match;
+				}
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Run recursively through a list of filters and return true when they all pass
+	 * @param array list of filters
+	 * @param array request params for this uri
+	 * @param array data store for arbitrary information
+	 */
+	private function _runFilters($filters, $requestParams, $store, &$filterResults)
+	{
+		$tmpFilterResults = $filterResults;
+
+		foreach ($filters as $filter)
+		{
+			// a filter can have "previous" filters, run them recursively
+			if (!empty($filter['filters']))
+			{
+				$filtersResult = $this->_runFilters($filter['filters'], $requestParams, $store, $tmpFilterResults);
+
+				if ($filtersResult === false)
+				{
+					return false;
+				}
+			}
+
+			// use _dispatch method to inject all kinds of nice things into the filter callback
+			$tmpFilterResults[$filter['name']] = $this->_dispatch($filter['filter'], $requestParams, $store, $tmpFilterResults);
+
+			if ($tmpFilterResults[$filter['name']] === false)
+			{
+				return false;
+			}
+		}
+
+		// only merge with the filter results when all filters are run successfully
+		$filterResults = array_merge($tmpFilterResults);
+
+		return true;
 	}
 
 	/**
@@ -509,17 +581,13 @@ class Vice
 			{
 				if (!empty($matches['negative']))
 				{
-					$func = function() use ($filter)
+					$filter['filter'] = function() use ($filter)
 					{
-						return !$filter();
+						return !$filter['filter']();
 					};
 				}
-				else
-				{
-					$func = $filter;
-				}
 
-				$filters[strtolower($filterName)] = $func;
+				$filters[strtolower($filterName)] = $filter;
 			}
 		}
 
